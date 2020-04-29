@@ -1,0 +1,16 @@
+{
+  "name": "listenreddit",
+  "version": "1.0.0",
+  "description": "app that let's you listen to reddit",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Po",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/storage": "^4.7.0",
+    "@google-cloud/text-to-speech": "^2.3.0",
+    "snoowrap": "^1.21.0"
+  }
+}
