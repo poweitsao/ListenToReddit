@@ -8,14 +8,14 @@ const util = require('util');
 const client = new textToSpeech.TextToSpeechClient();
 async function quickStart() {
     // The text to synthesize
-    var response1 = require("./response1.json")
-    const text = response1[0]["selftext"]
+    // var response1 = require("./response1.json")
+    const text = ""
 
     // Construct the request
     const request = {
         input: { text: text },
         // Select the language and SSML voice gender (optional)
-        voice: { languageCode: 'en-US', ssmlGender: 'NEUTRAL', name: "en-US-Wavenet-F" },
+        voice: { languageCode: 'en-IN', ssmlGender: 'NEUTRAL', name: "en-IN-Wavenet-A" },
         // select the type of audio encoding
         audioConfig: { audioEncoding: 'MP3' },
     };
@@ -24,8 +24,8 @@ async function quickStart() {
     const [response] = await client.synthesizeSpeech(request);
     // Write the binary audio content to a local file
     const writeFile = util.promisify(fs.writeFile);
-    await writeFile('response1-wav.mp3', response.audioContent, 'binary');
-    await writeFile('response1-wav.txt', response, 'binary');
+    await writeFile('reality.mp3', response.audioContent, 'binary');
+    // await writeFile('response1-wav.txt', response, 'binary');
     console.log(response)
     console.log('Audio content written to file: output.mp3');
 }
