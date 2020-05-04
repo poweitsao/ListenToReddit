@@ -1,14 +1,17 @@
-// const snoowrap = require('snoowrap');
 const fs = require('fs')
-const r = require("./app.js")
-const contentTest = require("./contentTest.json")
+const r = require("./snoowrapSetup.js")
 
-// r.getHot().map(post => post.title).then(console.log);
 
 async function getTopPosts(subreddit, time, limit) {
     const content = await r.getTop(subreddit, { time: time })
     const filteredContent = await extractContent(content)
     return filteredContent
+}
+
+async function getTopPostsTest() {
+    const contentTest = require("./../json/contentTest.json")
+    const filteredContent = await extractContent(contentTest)
+    // console.log(filteredContent)
 }
 
 
@@ -18,14 +21,18 @@ const extractContent = (input) => {
     var key = ""
 
     var splitPosts = {}
-    console.log(clonedInput.length)
     for (i = 0; i < clonedInput.length; i++) {
-        console.log(i)
-        console.log(clonedInput.length)
 
         var post = clonedInput[i]
 
-        var body = JSON.stringify(post["selftext"])
+        var body = post["selftext"]
+        var title = post["title"]
+        // console.log(title)
+        // console.log(body)
+        var newline = "\n\n"
+        body = title.concat(newline, body)
+        // console.log("title: ", title)
+        // console.log("body: ", body)
         var postSegments = []
         key = "post" + i
 
@@ -39,14 +46,12 @@ const extractContent = (input) => {
             while (remainingLength > 5000) {
                 if (body[currentEnd - 1] != ".") {
                     for (j = currentEnd - 1; j > currentStart; j--) {
-                        if (body[j] != ".") {
+                        if (body[j] == ".") {
                             currentEnd = j + 1
-                            console.log("break")
                             break;
                         }
                     }
                 }
-                console.log("while")
 
                 postSegments.push(body.substring(currentStart, currentEnd))
                 currentStart = currentEnd
@@ -56,8 +61,6 @@ const extractContent = (input) => {
             }
             if (remainingLength > 0) {
                 postSegments.push(body.substring(currentStart, body.length))
-                console.log("push")
-                console.log(i)
             }
 
         } else if (body.length < 5000) {
@@ -69,7 +72,6 @@ const extractContent = (input) => {
     }
 
     splitPosts["keys"] = keys
-    console.log(splitPosts["keys"])
     return splitPosts
 
 }
@@ -81,16 +83,15 @@ const writeFile = (input, filename) => {
             return console.log(err);
         }
 
-        console.log("JSON file has been saved.");
+        console.log("JSON file '" + filename + "' has been saved.");
     })
 }
 
-getTopPosts("tifu", "day", 11).then((result) => {
-    var stringifiedResult = JSON.stringify(result)
-    writeFile(stringifiedResult, "response2.json")
-})
-
-
+module.exports = {
+    writeFile,
+    getTopPosts,
+    getTopPostsTest
+}
 
 
 
