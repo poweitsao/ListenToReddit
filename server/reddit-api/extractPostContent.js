@@ -55,7 +55,8 @@ const extractPostContent = (input) => {
     }
 
     splitPosts["keys"] = keys
-    return splitPosts
+    console.log(splitPosts)
+    return JSON.stringify(splitPosts)
 
 }
 
