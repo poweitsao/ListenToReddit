@@ -9,7 +9,7 @@ async function getTopPosts(subreddit, time, limit) {
 }
 
 async function getTopPostsTest() {
-    const contentTest = require("./../json/contentTest.json")
+    const contentTest = require("../../json/contentTest.json")
     const filteredContent = await extractContent(contentTest)
     // console.log(filteredContent)
 }
