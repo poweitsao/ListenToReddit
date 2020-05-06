@@ -1,6 +1,7 @@
 // runs processes via function calls. 
 
-const { getTopPosts, getTopPostsTest, writeFile } = require("./reddit-api/getTopPosts")
+const { getTopPosts, getTopPostsTest } = require("./reddit-api/getTopPosts")
+const writeFile = require("./writeFile")
 const { JSONToMP3 } = require("./google-api/textToSpeech")
 const response2 = require("./../json/response2.json")
 

@@ -1,3 +1,5 @@
+// snoowrap Class documentation - https://not-an-aardvark.github.io/snoowrap/snoowrap.html
+
 const snoowrap = require('snoowrap');
 const { clientID, clientSecret, refreshToken } = require('../config.js')
 
