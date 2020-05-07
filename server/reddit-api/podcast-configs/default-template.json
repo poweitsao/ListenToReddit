@@ -1,5 +1,16 @@
 {
     "comments": {
-        "include": false
-    }
+        "include": false,
+        "amount": 3,
+        "includeAuthor": false
+    },
+    "host": [
+        {
+            "name": "John",
+            "voiceType": "WaveNet",
+            "languageCode": "en-US",
+            "voiceName": "en-US-Standard-E",
+            "gender": "MALE"
+        }
+    ]
 }

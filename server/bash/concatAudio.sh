@@ -21,4 +21,5 @@ for f in "${arr[@]}"; do
     files+="$f "
 # echo ${files}
 done
+
 cat ${files}>> bashCombine.mp3
