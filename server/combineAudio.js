@@ -18,4 +18,4 @@ const combineAudio = (directory) => {
 
 }
 
-combineAudio("../tests/audio")
+module.exports

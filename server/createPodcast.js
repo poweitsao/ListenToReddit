@@ -1,19 +1,40 @@
 const readline = require("readline");
+const fs = require('fs');
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-const redditAPI = require("./reddit-api/redditAPI")
+const { writeFile } = require("./writeFile")
+const textToSpeech = require("./google-api/textToSpeech")
 
+const redditAPI = require("./reddit-api/redditAPI")
+const directory = "/Users/poweitsao/Desktop/ListenReddit/tests"
+const audioLocation = "/Users/poweitsao/Desktop/ListenReddit/tests/scriptTest"
 rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit) => {
     rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
         if (defaultConfig == "yes") {
-            console.log(`\nCreating podcast with default config for r/${subreddit}`)
+            redditAPI.getTopPosts(subreddit, "daily", 5).then((result) => {
+                var processedResult = redditAPI.extractPostContent(result)
+                writeFile(processedResult, directory + "/posts.json").then(() => {
 
-            rl.close();
+                    const posts = JSON.parse(processedResult)
+
+                    key = posts["keys"][0]
+                    for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
+                        key = posts["keys"][postNumber]
+                        textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
+
+                    }
+                })
+            })
+
         } else {
             customPodcast(subreddit);
         }
+
+        combineAudio(audioLocation)
+        rl.close();
+
     })
 
 
@@ -26,6 +47,30 @@ const customPodcast = (subreddit) => {
         rl.close();
 
     })
+
+}
+
+const combineAudio = (directory) => {
+    var files = fs.readdirSync(directory);
+    files = files.join(' ')
+
+    // console.log(files)
+
+    var exec = require('child_process').exec;
+    exec(`cd ${directory}; cat ${files} > podcast.mp3`,
+        function (error, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+
+            if (fs.existsSync(directory + "/podcast.mp3")) {
+                console.log("Successfully combined files: podcast.mp3 created")
+            } else {
+                console.log("%c Something went wrong. podcast.mp3 not found in directory", 'color: #FF0000')
+            }
+        });
 
 }
 

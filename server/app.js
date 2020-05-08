@@ -22,7 +22,7 @@ getTopPosts("jokes", "day", 5).then((result) => {
 
         for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
             key = posts["keys"][postNumber]
-            // JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", directory + "/audio", key + ".mp3")
+            JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", directory + "/audio", key + ".mp3")
             // console.log("converting " + key + " to mp3 in " + directory + "/audio")
         }
     })
