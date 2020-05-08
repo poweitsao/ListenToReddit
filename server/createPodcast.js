@@ -3,11 +3,13 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
+const redditAPI = require("./reddit-api/redditAPI")
 
 rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit) => {
     rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
         if (defaultConfig == "yes") {
             console.log(`\nCreating podcast with default config for r/${subreddit}`)
+
             rl.close();
         } else {
             customPodcast(subreddit);

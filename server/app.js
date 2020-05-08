@@ -4,14 +4,38 @@ const { getTopPosts, getTopPostsTest } = require("./reddit-api/getTopPosts")
 const { extractPostContent } = require("./reddit-api/extractPostContent")
 const { writeFile } = require("./writeFile")
 const { JSONToMP3 } = require("./google-api/textToSpeech")
+const { cleanseString } = require("./reddit-api/cleanseString")
+
 // const response2 = require("./../json/response2.json")
 
-
-getTopPosts("tifu", "day").then((result) => {
+var directory = "/Users/poweitsao/Desktop/ListenReddit/tests"
+getTopPosts("jokes", "day", 5).then((result) => {
     // var stringifiedResult = JSON.stringify(result)
     var processedResult = extractPostContent(result)
-    writeFile(processedResult, "../json/response2.json")
+    writeFile(processedResult, directory + "/posts.json").then(() => {
+        const posts = JSON.parse(processedResult)
+        // console.log(posts["keys"])
+
+        key = posts["keys"][0]
+        // JSONToMP3(posts[key], "en-US", "MALE", "en-US-Standard-E", directory + "/audio", key + ".mp3")
+        // JSONToMP3(posts[key], "en-US", "MALE", "en-US-Standard-E", directory + "/audio", key + ".mp3")
+
+        for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
+            key = posts["keys"][postNumber]
+            // JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", directory + "/audio", key + ".mp3")
+            // console.log("converting " + key + " to mp3 in " + directory + "/audio")
+        }
+    })
 })
+
+// const a = require("./../tests/posts.json")
+// key = "post2"
+// var string = cleanseString(a["post2"][0])
+// // console.log(string)
+// // console.log(string)
+// // console.log(array)
+// JSONToMP3(string, "en-US", "MALE", "en-US-Standard-E", directory + "/audio", key + ".mp3")
+
 
 // getTopPostsTest().then((content) => {
 //     console.log(content)

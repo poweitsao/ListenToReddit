@@ -5,11 +5,11 @@
 #   echo "$entry"
 # done
 
-arr=$(ls /Users/poweitsao/Desktop/ListenReddit/audio/combinedTest2)
+arr=$(ls /Users/poweitsao/Desktop/ListenReddit/tests/audio)
 
 # iterate through array using a counter
 
-cd /Users/poweitsao/Desktop/ListenReddit/audio/combinedTest2
+cd /Users/poweitsao/Desktop/ListenReddit/tests/audio
 
 # cat empty.mp3 post1-0.mp3 >> bashCombine.mp3
 

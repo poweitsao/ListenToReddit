@@ -5,7 +5,7 @@ const textToSpeech = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const util = require('util');
 // Creates a client
-async function JSONToMP3(text, languageCode, ssmlGender, voiceName, filename) {
+async function JSONToMP3(text, languageCode, ssmlGender, voiceName, directory, filename) {
     // The text to synthesize
     // var response1 = require("./response1.json")
     const client = new textToSpeech.TextToSpeechClient();
@@ -23,11 +23,10 @@ async function JSONToMP3(text, languageCode, ssmlGender, voiceName, filename) {
     const [response] = await client.synthesizeSpeech(request);
     // Write the binary audio content to a local file
     const writeFile = util.promisify(fs.writeFile);
-    filename = "../audio/" + filename
-    await writeFile(filename, response.audioContent, 'binary');
+    await writeFile(directory + "/" + filename, response.audioContent, 'binary');
     // await writeFile('response1-wav.txt', response, 'binary');
     // console.log(response)
-    console.log('Audio content written to file: ' + filename);
+    console.log('Audio content written to file: ' + filename + " in " + directory);
 }
 
 module.exports = {

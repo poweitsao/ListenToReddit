@@ -4,7 +4,7 @@ const { extractPostContent } = require("./extractPostContent")
 
 
 async function getTopPosts(subreddit, time, limit) {
-    const content = await r.getTop(subreddit, { time: time })
+    const content = await r.getTop(subreddit, { time: time, limit: limit })
     return content
 
     // const filteredContent = await extractPostContent(content)

@@ -1,4 +1,16 @@
-const { cleanseString } = require("./cleanseString")
+const fs = require('fs')
+const r = require("./snoowrapSetup.js")
+const { writeFile } = require("./../writeFile")
+
+
+
+async function getTopPosts(subreddit, time, limit) {
+    const content = await r.getTop(subreddit, { time: time, limit: limit })
+    return content
+
+    // const filteredContent = await extractPostContent(content)
+    // return filteredContent
+}
 
 const extractPostContent = (input) => {
     var clonedInput = JSON.parse(JSON.stringify(input))
@@ -63,6 +75,36 @@ const extractPostContent = (input) => {
 
 }
 
-module.exports = {
-    extractPostContent
+async function getTopComments(subreddit, time) {
+    const content = await r.getTop(subreddit, { time: time, limit: 1 })
+    var response = await content[0].comments.fetchMore({ sort: 'top', skipReplies: "true", amount: 20 })
+    // console.log(result)
+    response = JSON.parse(JSON.stringify(response))
+    // console.log(response[0])
+    var extractedComments = extractComments(response)
+    writeFile(JSON.stringify(extractedComments), "./../../json/topCommentsExtracted.json")
+
+}
+
+const extractComments = (response) => {
+
+    var extractedComments = {}
+    var keys = []
+    for (i = 0; i < response.length; i++) {
+        key = "comment" + i
+        keys.push(key)
+        extractedComments[key] = {
+            "text": response[i]["body"],
+            "upvotes": response[i]["ups"]
+        }
+        // console.log(response[i]["body"])
+    }
+    extractedComments["keys"] = keys
+
+    return extractedComments
+}
+
+const cleanseString = (string) => {
+    result = JSON.stringify(string).replace(/[^\x00-\x7F]/g, "")
+    return string
 }
