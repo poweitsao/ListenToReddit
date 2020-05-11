@@ -8,8 +8,8 @@ const { writeFile } = require("./writeFile")
 const textToSpeech = require("./google-api/textToSpeech")
 
 const redditAPI = require("./reddit-api/redditAPI")
-const directory = "/Users/poweitsao/Desktop/ListenReddit/tests"
-const audioLocation = "/Users/poweitsao/Desktop/ListenReddit/tests/scriptTest"
+const directory = "../tests"
+const audioLocation = "../tests/scriptTest"
 rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit) => {
     rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
         if (defaultConfig == "yes") {
@@ -25,6 +25,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit
                         textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
 
                     }
+                    combineAudio(audioLocation)
                 })
             })
 
@@ -32,7 +33,6 @@ rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit
             customPodcast(subreddit);
         }
 
-        combineAudio(audioLocation)
         rl.close();
 
     })
