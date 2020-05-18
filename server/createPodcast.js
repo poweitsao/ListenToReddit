@@ -25,7 +25,6 @@ rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit
                         textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
 
                     }
-                    combineAudio(audioLocation)
                 })
             })
 
@@ -33,6 +32,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit
             customPodcast(subreddit);
         }
 
+        combineAudio(audioLocation)
         rl.close();
 
     })

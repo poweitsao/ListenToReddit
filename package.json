@@ -9,10 +9,12 @@
   "author": "Po",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/firestore": "^3.8.0",
     "@google-cloud/storage": "^4.7.0",
     "@google-cloud/text-to-speech": "^2.3.0",
     "crunker": "^0.2.0",
     "dotenv": "^8.2.0",
-    "snoowrap": "^1.21.0"
+    "snoowrap": "^1.21.0",
+    "unirest": "^0.6.0"
   }
 }
