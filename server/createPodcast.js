@@ -16,8 +16,8 @@ const uploadPodcast = require("./uploadPodcast")
 
 
 rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subreddit) => {
-    rl.question("Do you want the default option podcast configuration? (yes/no) \n", (defaultConfig) => {
-        rl.question("Would you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
+    rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
+        rl.question("\nWould you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
             let newFilename = createPodcastFilename(subreddit)
             if (defaultConfig == "yes") {
