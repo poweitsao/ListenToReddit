@@ -8,37 +8,52 @@ const { writeFile } = require("./writeFile")
 const textToSpeech = require("./google-api/textToSpeech")
 
 const redditAPI = require("./reddit-api/redditAPI")
-const directory = "../tests"
-const audioLocation = "../tests/scriptTest"
+const directory = "../audio/createPlayground"
+const audioLocation = "../audio/createPlayground/assets"
+// var execSync = require('exec-sync');
+
+
 rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit) => {
     rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
+        let newFilename = createPodcastFilename(subreddit)
         if (defaultConfig == "yes") {
             redditAPI.getTopPosts(subreddit, "daily", 5).then((result) => {
                 var processedResult = redditAPI.extractPostContent(result)
-                writeFile(processedResult, directory + "/posts.json").then(() => {
+                writeFile(processedResult, directory + "/posts.json").then(async () => {
 
                     const posts = JSON.parse(processedResult)
 
                     key = posts["keys"][0]
                     for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
                         key = posts["keys"][postNumber]
-                        textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
-
+                        await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
                     }
+                    combineAudio(newFilename, audioLocation)
                 })
             })
 
         } else {
             customPodcast(subreddit);
+            combineAudio(newFilename, audioLocation)
+
         }
 
-        combineAudio(audioLocation)
         rl.close();
 
     })
 
 
 })
+
+const createPodcastFilename = (subreddit) => {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+
+    var newFilename = subreddit + "-" + yyyy + "-" + mm + '-' + dd + ".mp3";
+    return newFilename
+}
 
 const customPodcast = (subreddit) => {
 
@@ -50,27 +65,54 @@ const customPodcast = (subreddit) => {
 
 }
 
-const combineAudio = (directory) => {
+async function combineAudio(newFilename, directory) {
     var files = fs.readdirSync(directory);
+
     files = files.join(' ')
 
-    // console.log(files)
-
     var exec = require('child_process').exec;
-    exec(`cd ${directory}; cat ${files} > podcast.mp3`,
+
+    exec(`cd ${directory}; cat ${files} > ${newFilename}`,
         function (error, stdout, stderr) {
+
             console.log(stdout);
             console.log(stderr);
             if (error !== null) {
                 console.log('exec error: ' + error);
             }
 
-            if (fs.existsSync(directory + "/podcast.mp3")) {
-                console.log("Successfully combined files: podcast.mp3 created")
+            if (fs.existsSync(directory + "/" + newFilename)) {
+                console.log("Successfully combined files: " + newFilename + " created")
+
             } else {
-                console.log("%c Something went wrong. podcast.mp3 not found in directory", 'color: #FF0000')
+                console.log("%c Something went wrong. " + newFilename + " not found in directory", 'color: #FF0000')
             }
-        });
+
+        }).on("exit", () => {
+            exec(`cd ${directory}; mv ${newFilename} ..;`,
+                function (error, stdout, stderr) {
+                    console.log(stdout)
+                    console.log(newFilename + " moved out of assets folder")
+
+                }).on("exit", function () {
+                    var assetsFolder = directory.split("/")
+                    assetsFolder = assetsFolder[assetsFolder.length - 1]
+                    exec(`cd ${directory}; cd ..; rm ${assetsFolder + "/*"}`,
+                        function (error, stdout, stderr) {
+                            console.log(stdout)
+                            console.log("Removed temporary assets")
+                            process.exit()
+
+                        })
+                })
+        })
+
+
+
+
+
+
+
 
 }
 
@@ -85,3 +127,5 @@ const combineAudio = (directory) => {
 //     console.log("\nBYE BYE !!!");
 //     process.exit(0);
 // });
+
+// create()

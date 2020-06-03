@@ -27,6 +27,7 @@ async function JSONToMP3(text, languageCode, ssmlGender, voiceName, directory, f
     // await writeFile('response1-wav.txt', response, 'binary');
     // console.log(response)
     console.log('Audio content written to file: ' + filename + " in " + directory);
+    return directory
 }
 
 module.exports = {
