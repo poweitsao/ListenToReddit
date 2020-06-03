@@ -2,7 +2,8 @@ const readline = require("readline");
 const fs = require('fs');
 const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    terminal: false
 });
 const { writeFile } = require("./writeFile")
 const textToSpeech = require("./google-api/textToSpeech")
@@ -11,34 +12,50 @@ const redditAPI = require("./reddit-api/redditAPI")
 const directory = "../audio/createPlayground"
 const audioLocation = "../audio/createPlayground/assets"
 // var execSync = require('exec-sync');
+const uploadPodcast = require("./uploadPodcast")
 
 
-rl.question("\nWhat subreddit do you want to create a podcast for? ", (subreddit) => {
-    rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
-        let newFilename = createPodcastFilename(subreddit)
-        if (defaultConfig == "yes") {
-            redditAPI.getTopPosts(subreddit, "daily", 5).then((result) => {
-                var processedResult = redditAPI.extractPostContent(result)
-                writeFile(processedResult, directory + "/posts.json").then(async () => {
+rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subreddit) => {
+    rl.question("Do you want the default option podcast configuration? (yes/no) \n", (defaultConfig) => {
+        rl.question("Would you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
-                    const posts = JSON.parse(processedResult)
+            let newFilename = createPodcastFilename(subreddit)
+            if (defaultConfig == "yes") {
+                redditAPI.getTopPosts(subreddit, "daily", 5).then((result) => {
+                    var processedResult = redditAPI.extractPostContent(result)
+                    writeFile(processedResult, directory + "/posts.json").then(async () => {
 
-                    key = posts["keys"][0]
-                    for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
-                        key = posts["keys"][postNumber]
-                        await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
-                    }
-                    combineAudio(newFilename, audioLocation)
+                        const posts = JSON.parse(processedResult)
+
+                        key = posts["keys"][0]
+                        for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
+                            key = posts["keys"][postNumber]
+                            await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
+                        }
+                        combineAudio(newFilename, audioLocation).then(async () => {
+                            if (upload == "yes") {
+                                await uploadPodcast.autoUpload(newFilename)
+                                rl.close()
+
+                            } else {
+                                console.log("\nAuto-upload canceled")
+                                rl.close()
+
+                            }
+                        })
+
+                        // return
+                    })
                 })
-            })
 
-        } else {
-            customPodcast(subreddit);
-            combineAudio(newFilename, audioLocation)
 
-        }
 
-        rl.close();
+            } else {
+                customPodcast(subreddit);
+                combineAudio(newFilename, audioLocation)
+            }
+
+        })
 
     })
 
@@ -66,48 +83,54 @@ const customPodcast = (subreddit) => {
 }
 
 async function combineAudio(newFilename, directory) {
-    var files = fs.readdirSync(directory);
+    return new Promise((resolve) => {
+        var files = fs.readdirSync(directory);
 
-    files = files.join(' ')
+        files = files.join(' ')
 
-    var exec = require('child_process').exec;
+        var exec = require('child_process').exec;
 
-    exec(`cd ${directory}; cat ${files} > ${newFilename}`,
-        function (error, stdout, stderr) {
+        exec(`cd ${directory}; cat ${files} > ${newFilename}`,
+            function (error, stdout, stderr) {
 
-            console.log(stdout);
-            console.log(stderr);
-            if (error !== null) {
-                console.log('exec error: ' + error);
-            }
+                console.log(stdout);
+                console.log(stderr);
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
 
-            if (fs.existsSync(directory + "/" + newFilename)) {
-                console.log("Successfully combined files: " + newFilename + " created")
+                if (fs.existsSync(directory + "/" + newFilename)) {
+                    console.log("Successfully combined files: " + newFilename + " created")
 
-            } else {
-                console.log("%c Something went wrong. " + newFilename + " not found in directory", 'color: #FF0000')
-            }
+                } else {
+                    console.log("%c Something went wrong. " + newFilename + " not found in directory", 'color: #FF0000')
+                }
 
-        }).on("exit", () => {
-            exec(`cd ${directory}; mv ${newFilename} ..;`,
-                function (error, stdout, stderr) {
-                    console.log(stdout)
-                    console.log(newFilename + " moved out of assets folder")
+            }).on("exit", () => {
+                exec(`cd ${directory}; mv ${newFilename} ..;`,
+                    function (error, stdout, stderr) {
+                        console.log(stdout)
+                        console.log(newFilename + " moved out of assets folder")
 
-                }).on("exit", function () {
-                    var assetsFolder = directory.split("/")
-                    assetsFolder = assetsFolder[assetsFolder.length - 1]
-                    exec(`cd ${directory}; cd ..; rm ${assetsFolder + "/*"}`,
-                        function (error, stdout, stderr) {
-                            console.log(stdout)
-                            console.log("Removed temporary assets")
-                            process.exit()
+                    }).on("exit", function () {
+                        var assetsFolder = directory.split("/")
+                        assetsFolder = assetsFolder[assetsFolder.length - 1]
+                        exec(`cd ${directory}; cd ..; rm ${assetsFolder + "/*"}`,
+                            function (error, stdout, stderr) {
+                                console.log(stdout)
+                                console.log("Removed temporary assets")
 
-                        })
-                })
-        })
+                            })
+                    }).on("exit", function () {
+                        resolve(true);
+
+                    })
 
 
+
+            })
+
+    })
 
 
 

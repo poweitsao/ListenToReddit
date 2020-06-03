@@ -5,13 +5,13 @@ const db = new Firestore({
     keyFilename: '/Users/poweitsao/Desktop/ListenReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
 });
 
-const addPodcastToDB = (subreddit, filename, storage_url) => {
+const addPodcastToDB = async (subreddit, filename, storage_url) => {
     let docRef = db.collection('subreddits').doc(subreddit).collection('podcasts').doc(filename);
 
     docRef.set({
         filename: filename,
         cloud_storage_url: storage_url,
-    }).then(console.log(filename + " added to subreddits" + "/" + subreddit + "/podcasts in Cloud FireStore"))
+    }).then(console.log(filename + " added to subreddits" + "/" + subreddit + "/podcasts in Cloud Datastore"))
 
 }
 
