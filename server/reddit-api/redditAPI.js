@@ -21,8 +21,10 @@ const extractPostContent = (input) => {
     for (i = 0; i < clonedInput.length; i++) {
 
         var post = JSON.parse(JSON.stringify(clonedInput[i]))
-        post["selftext"] = post["selftext"].replace(/[^\x00-\x7F]/g, "").replace("&#8203;" && "&#x200B", "")
-        post["title"] = post["title"].replace(/[^\x00-\x7F]/g, "").replace("&#8203;" && "&#x200B", "")
+        post["selftext"] = post["selftext"].replace(/[^\x00-\x7F]/g, "").replace(/&#8203;|&#8203|&#x200B/gi,
+            () => { return "" })
+        post["title"] = post["title"].replace(/[^\x00-\x7F]/g, "").replace(/&#8203;|&#8203|&#x200B/gi,
+            () => { return "" })
         var body = post["selftext"]
         var title = post["title"]
         // console.log(title)
