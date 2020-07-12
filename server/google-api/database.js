@@ -1,9 +1,17 @@
 const Firestore = require('@google-cloud/firestore');
 
+var file = require("../../credentials/eternal-arcana-275612-78d4d7540a6a.json")
+
+
 const db = new Firestore({
     projectId: 'eternal-arcana-275612',
-    keyFilename: '/Users/poweitsao/Desktop/ListenReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
+    credentials: { client_email: file.client_email, private_key: file.private_key }
 });
+
+// const db = new Firestore({
+//     projectId: 'eternal-arcana-275612',
+//     keyFilename: '/Users/poweitsao/Desktop/ListenReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
+// });
 
 const addPodcastToDB = async (subreddit, filename, storage_url) => {
     let docRef = db.collection('subreddits').doc(subreddit).collection('podcasts').doc(filename);
@@ -23,7 +31,6 @@ const updateAlbumCover = (subreddit, album_url) => {
         console.log(response)
     })
 }
-// addPodcastToDB("jokes", "test1")
 
 module.exports = {
     addPodcastToDB,

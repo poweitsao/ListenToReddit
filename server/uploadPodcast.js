@@ -11,7 +11,7 @@ const playgroundDirectory = "../audio/createPlayground/"
 
 // const exec = require('child_process').exec;
 
-const manualUpload = async () => {
+const manualUpload = async (subreddit) => {
     var files = fs.readdirSync(playgroundDirectory);
     files.splice(files.indexOf("assets"), 1)
     files = files.join(", ")
@@ -20,22 +20,22 @@ const manualUpload = async () => {
 
     rl.question(`\nWhich podcast do you want to upload? \nOptions: (${files})`, async (filename) => {
 
-        var fileInfo = filename.split("-")
-        var subreddit = fileInfo[0]
+        // var fileInfo = filename.split("-")
+        // var subreddit = fileInfo[0]
         await cloudStorage.uploadFile("listen-to-reddit-test", playgroundDirectory + filename)
-        await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "podcasts/" + filename)
-        database.addPodcastToDB(subreddit, filename, cloudStorage.getFileURL("listen-to-reddit-test", "podcasts", filename))
+        await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "subreddits/" + subreddit + "/" + filename)
+        database.addPodcastToDB(subreddit, filename, cloudStorage.getFileURL("listen-to-reddit-test", "subreddits/" + subreddit, filename))
         rl.close()
     })
 }
 
-const autoUpload = async (filename) => {
-    let splitFilename = filename.split("-")
-    let subreddit = splitFilename[0]
+const autoUpload = async (filename, subreddit) => {
+    // let splitFilename = filename.split("-")
+    // let subreddit = splitFilename[0]
 
     await cloudStorage.uploadFile("listen-to-reddit-test", playgroundDirectory + filename)
-    await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "podcasts/" + filename)
-    await database.addPodcastToDB(subreddit, filename, cloudStorage.getFileURL("listen-to-reddit-test", "podcasts", filename))
+    await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "subreddits/" + subreddit + "/" + filename)
+    database.addPodcastToDB(subreddit, filename, cloudStorage.getFileURL("listen-to-reddit-test", "subreddits/" + subreddit, filename))
     console.log("\nAuto-upload complete!")
 }
 

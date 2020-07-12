@@ -34,7 +34,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subredd
                         }
                         combineAudio(newFilename, audioLocation).then(async () => {
                             if (upload == "yes") {
-                                await uploadPodcast.autoUpload(newFilename)
+                                await uploadPodcast.autoUpload(newFilename, subreddit)
                                 rl.close()
 
                             } else {

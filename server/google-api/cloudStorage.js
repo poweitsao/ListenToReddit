@@ -8,7 +8,13 @@
 const { Storage } = require('@google-cloud/storage');
 
 // Creates a client
-const storage = new Storage();
+
+var file = require("../../credentials/eternal-arcana-275612-78d4d7540a6a.json")
+
+const storage = new Storage({
+    projectId: 'eternal-arcana-275612',
+    keyFilename: '/Users/poweitsao/Desktop/ListenReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
+});
 
 async function uploadFile(bucketName, filename) {
     // Uploads a local file to the bucket
@@ -36,7 +42,8 @@ async function moveFile(bucketName, source, destination) {
 
 }
 const getFileURL = (bucketName, folder, filename) => {
-    return "https://storage.googleapis.com/" + bucketName + "/" + folder + "/" + filename;
+    // https://storage.cloud.google.com/listen-to-reddit-test/subreddits/tifu/tifu-2020-06-02.mp3
+    return "https://storage.cloud.google.com/" + bucketName + "/" + folder + "/" + filename;
 }
 
 async function getMetadata(bucketName, folder, filename) {
