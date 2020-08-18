@@ -7,6 +7,8 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
+const getMP3Duration = require('get-mp3-duration')
+
 const playgroundDirectory = "../audio/createPlayground/"
 
 // const exec = require('child_process').exec;
@@ -29,7 +31,7 @@ const manualUpload = async (subreddit) => {
     })
 }
 
-const autoUpload = async (filename, subreddit) => {
+const autoUploadCombinedPodcast = async (filename, subreddit) => {
     // let splitFilename = filename.split("-")
     // let subreddit = splitFilename[0]
 
@@ -39,7 +41,31 @@ const autoUpload = async (filename, subreddit) => {
     console.log("\nAuto-upload complete!")
 }
 
+const getPodcastDuration = (audioLocation, file) => {
+    var buffer = fs.readFileSync(audioLocation + "/" + file)
+    var duration = getMP3Duration(buffer) / 1000
+    duration = Math.round(duration)
+    return duration
+}
+
+const autoUploadIndividualPodcasts = async (files, subreddit, audioLocation) => {
+    var duration = 0
+    for (fileItr = 0; fileItr < files.length; fileItr++) {
+        var filename = files[fileItr]
+        duration = getPodcastDuration(audioLocation, filename)
+
+        //console.log("duration", duration)
+
+        await cloudStorage.uploadFile("listen-to-reddit-test", audioLocation + "/" + filename)
+        await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "subreddits/" + subreddit + "/" + filename)
+        database.addPodcastToDB(subreddit, filename, cloudStorage.getFileURL("listen-to-reddit-test", "subreddits/" + subreddit, filename), duration)
+    }
+
+    console.log("\nAuto-upload complete!")
+}
+
+
 module.exports = {
-    manualUpload, autoUpload
+    manualUpload, autoUploadCombinedPodcast, autoUploadIndividualPodcasts
 }
 

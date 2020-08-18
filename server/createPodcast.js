@@ -12,55 +12,91 @@ const redditAPI = require("./reddit-api/redditAPI")
 const directory = "../audio/createPlayground"
 const audioLocation = "../audio/createPlayground/assets"
 // var execSync = require('exec-sync');
-const uploadPodcast = require("./uploadPodcast")
+const uploadPodcast = require("./uploadPodcast");
+const { getIndividualPodcasts } = require("./getIndividualPodcasts");
 
 
 rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subreddit) => {
     rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
-        rl.question("\nWould you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
-            let newFilename = createPodcastFilename(subreddit)
-            if (defaultConfig == "yes") {
-                redditAPI.getTopPosts(subreddit, "daily", 5).then((result) => {
-                    var processedResult = redditAPI.extractPostContent(result)
-                    writeFile(processedResult, directory + "/posts.json").then(async () => {
+        rl.question("\nDo you want to combine the posts into one podcast? (yes/no) ", (combine) => {
 
-                        const posts = JSON.parse(processedResult)
+            rl.question("\nWould you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
-                        key = posts["keys"][0]
-                        for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
-                            key = posts["keys"][postNumber]
-                            await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
-                        }
-                        combineAudio(newFilename, audioLocation).then(async () => {
-                            if (upload == "yes") {
-                                await uploadPodcast.autoUpload(newFilename, subreddit)
-                                rl.close()
+                if (defaultConfig == "yes") {
+                    redditAPI.getTopPosts(subreddit, "daily", 8).then((result) => {
+                        var processedResult = redditAPI.extractPostContent(result)
+                        writeFile(processedResult, directory + "/posts.json").then(async () => {
 
+                            // await convertPostToPodcast(processedResult)
+
+                            if (combine == "yes") {
+                                let newFilename = createPodcastFilename(subreddit)
+                                await convertPostToCombinedPodcast(processedResult)
+                                combineAudio(newFilename, audioLocation).then(async () => {
+                                    if (upload == "yes") {
+                                        await uploadPodcast.autoUploadCombinedPodcast(newFilename, subreddit)
+                                        rl.close()
+
+                                    } else {
+                                        console.log("\nAuto-upload canceled")
+                                        rl.close()
+
+                                    }
+                                })
                             } else {
-                                console.log("\nAuto-upload canceled")
-                                rl.close()
+                                await convertPostsToPodcasts(processedResult)
+                                if (upload == "yes") {
+                                    var files = getIndividualPodcasts(audioLocation)
 
+                                    await uploadPodcast.autoUploadIndividualPodcasts(files, subreddit, audioLocation)
+                                    rl.close()
+
+                                } else {
+                                    console.log("\nAuto-upload canceled")
+                                    rl.close()
+
+                                }
                             }
+
+
+                            // return
                         })
 
-                        // return
                     })
-                })
 
 
 
-            } else {
-                customPodcast(subreddit);
-                combineAudio(newFilename, audioLocation)
-            }
-
+                } else {
+                    customPodcast(subreddit);
+                    combineAudio(newFilename, audioLocation)
+                }
+            })
         })
 
     })
 
 
 })
+
+const convertPostToCombinedPodcast = async (file) => {
+    const posts = JSON.parse(file)
+
+    key = posts["keys"][0]
+    for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
+        key = posts["keys"][postNumber]
+        await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, "post-" + postNumber.toString() + ".mp3")
+    }
+}
+const convertPostsToPodcasts = async (file) => {
+    const posts = JSON.parse(file)
+
+    key = posts["keys"][0]
+    for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
+        key = posts["keys"][postNumber]
+        await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
+    }
+}
 
 const createPodcastFilename = (subreddit) => {
     var today = new Date();

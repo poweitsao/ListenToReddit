@@ -1,15 +1,16 @@
-const fs = require('fs')
-const r = require("./snoowrapSetup.js")
-const { writeFile } = require("./../writeFile")
+const redditAPI = require("./reddit-api/redditAPI")
+const { writeFile } = require("./writeFile")
+const { getIndividualPodcasts } = require("./getIndividualPodcasts")
+const getMP3Duration = require('get-mp3-duration')
+const fs = require('fs');
+const moment = require('moment')
 
+const { autoUploadIndividualPodcasts } = require("./uploadPodcast")
 
-
-async function getTopPosts(subreddit, time, limit) {
-    const content = await r.getTop(subreddit, { time: time, limit: limit })
-    return content
-
-    // const filteredContent = await extractPostContent(content)
-    // return filteredContent
+function formatDuration(duration) {
+    return moment
+        .duration(duration, "seconds")
+        .format("mm:ss", { trim: false });
 }
 
 const extractPostContent = (input) => {
@@ -76,43 +77,27 @@ const extractPostContent = (input) => {
 
 }
 
-async function getTopComments(subreddit, time) {
-    const content = await r.getTop(subreddit, { time: time, limit: 1 })
-    var response = await content[0].comments.fetchMore({ sort: 'top', skipReplies: "true", amount: 20 })
-    // console.log(result)
-    response = JSON.parse(JSON.stringify(response))
-    // console.log(response[0])
-    var extractedComments = extractComments(response)
-    writeFile(JSON.stringify(extractedComments), "./../../json/topCommentsExtracted.json")
+const test = async () => {
+    // redditAPI.getTopPosts("tifu", "daily", 2).then((result) => {
+    //     // var processedResult = redditAPI.extractPostContent(result)
+    //     var processedResult = redditAPI.extractPostContent(result)
+    //     writeFile(processedResult, "./test.json")
+
+    // })
+    const audioLocation = "../audio/createPlayground/assets"
+    var files = getIndividualPodcasts(audioLocation)
+
+    autoUploadIndividualPodcasts(files, "Showerthoughts", audioLocation)
+    // var files = getIndividualPodcasts(audioLocation)
+    // console.log(files)
+    // const buffer = fs.readFileSync(audioLocation + "/" + files[2])
+
+    // const duration = getMP3Duration(buffer)
+    // console.log("duration", duration)
+
+
+
 
 }
 
-const extractComments = (response) => {
-
-    var extractedComments = {}
-    var keys = []
-    for (i = 0; i < response.length; i++) {
-        key = "comment" + i
-        keys.push(key)
-        extractedComments[key] = {
-            "text": response[i]["body"],
-            "upvotes": response[i]["ups"]
-        }
-        // console.log(response[i]["body"])
-    }
-    extractedComments["keys"] = keys
-
-    return extractedComments
-}
-
-const cleanseString = (string) => {
-    result = JSON.stringify(string).replace(/[^\x00-\x7F]/g, "")
-    return string
-}
-
-module.exports = {
-    extractPostContent,
-    getTopComments,
-    getTopPosts,
-    cleanseString
-}
+test()
