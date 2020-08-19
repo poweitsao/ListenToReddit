@@ -5,7 +5,11 @@ const getMP3Duration = require('get-mp3-duration')
 const fs = require('fs');
 const moment = require('moment')
 
-const { autoUploadIndividualPodcasts } = require("./uploadPodcast")
+const { autoUploadIndividualPodcasts } = require("./uploadPodcast");
+const { arch } = require("os");
+
+const audioLocation = "../audio/createPlayground/assets"
+
 
 function formatDuration(duration) {
     return moment
@@ -77,6 +81,27 @@ const extractPostContent = (input) => {
 
 }
 
+function archiveAudioFiles(directory) {
+    var exec = require('child_process').exec;
+    exec(`cd ${directory}; mv *.mp3 ../archive`,
+        function (error, stdout, stderr) {
+
+            console.log(stdout);
+            console.log(stderr);
+            if (error !== null) {
+                console.error('exec error: ' + error);
+            }
+
+            if (fs.readdirSync(directory).length === 0) {
+                console.log('\x1b[36m%s\x1b[0m', "Successfully archived files.")
+
+            } else {
+                console.error("%c Something went wrong. Files still found in directory")
+            }
+
+        })
+}
+
 const test = async () => {
     // redditAPI.getTopPosts("tifu", "daily", 2).then((result) => {
     //     // var processedResult = redditAPI.extractPostContent(result)
@@ -84,16 +109,19 @@ const test = async () => {
     //     writeFile(processedResult, "./test.json")
 
     // })
-    const audioLocation = "../audio/createPlayground/assets"
-    var files = getIndividualPodcasts(audioLocation)
+    // const audioLocation = "../audio/createPlayground/assets"
+    // var files = getIndividualPodcasts(audioLocation)
 
-    autoUploadIndividualPodcasts(files, "Showerthoughts", audioLocation)
+    // autoUploadIndividualPodcasts(files, "Showerthoughts", audioLocation)
     // var files = getIndividualPodcasts(audioLocation)
     // console.log(files)
     // const buffer = fs.readFileSync(audioLocation + "/" + files[2])
 
     // const duration = getMP3Duration(buffer)
     // console.log("duration", duration)
+
+    // archiveAudioFiles(audioLocation)
+    console.log('\x1b[36m%s\x1b[0m', "Test")
 
 
 

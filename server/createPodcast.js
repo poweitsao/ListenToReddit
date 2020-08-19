@@ -24,7 +24,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subredd
             rl.question("\nWould you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
                 if (defaultConfig == "yes") {
-                    redditAPI.getTopPosts(subreddit, "daily", 8).then((result) => {
+                    redditAPI.getTopPosts(subreddit, "weekly", 5).then((result) => {
                         var processedResult = redditAPI.extractPostContent(result)
                         writeFile(processedResult, directory + "/posts.json").then(async () => {
 
@@ -50,6 +50,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subredd
                                     var files = getIndividualPodcasts(audioLocation)
 
                                     await uploadPodcast.autoUploadIndividualPodcasts(files, subreddit, audioLocation)
+                                    archiveAudioFiles(audioLocation)
                                     rl.close()
 
                                 } else {
@@ -116,6 +117,27 @@ const customPodcast = (subreddit) => {
 
     })
 
+}
+
+function archiveAudioFiles(directory) {
+    var exec = require('child_process').exec;
+    exec(`cd ${directory}; mv *.mp3 ../archive`,
+        function (error, stdout, stderr) {
+
+            console.log(stdout);
+            console.log(stderr);
+            if (error !== null) {
+                console.error('exec error: ' + error);
+            }
+
+            if (fs.readdirSync(directory).length === 0) {
+                console.info('\x1b[36m%s\x1b[0m', "Successfully archived files.")
+
+            } else {
+                console.error("%c Something went wrong. Files still found in directory")
+            }
+
+        })
 }
 
 async function combineAudio(newFilename, directory) {

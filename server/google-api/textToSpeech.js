@@ -19,6 +19,8 @@ async function JSONToMP3(text, languageCode, ssmlGender, voiceName, directory, f
         audioConfig: { audioEncoding: 'MP3' },
     };
 
+    filename = filename.replace("/", " or ")
+
     // Performs the text-to-speech request
     const [response] = await client.synthesizeSpeech(request);
     // Write the binary audio content to a local file

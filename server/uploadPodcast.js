@@ -38,7 +38,7 @@ const autoUploadCombinedPodcast = async (filename, subreddit) => {
     await cloudStorage.uploadFile("listen-to-reddit-test", playgroundDirectory + filename)
     await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "subreddits/" + subreddit + "/" + filename)
     database.addPodcastToDB(subreddit, filename, cloudStorage.getFileURL("listen-to-reddit-test", "subreddits/" + subreddit, filename))
-    console.log("\nAuto-upload complete!")
+    console.log('\x1b[36m%s\x1b[0m', "\nAuto-upload complete!")
 }
 
 const getPodcastDuration = (audioLocation, file) => {
@@ -58,7 +58,12 @@ const autoUploadIndividualPodcasts = async (files, subreddit, audioLocation) => 
 
         await cloudStorage.uploadFile("listen-to-reddit-test", audioLocation + "/" + filename)
         await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "subreddits/" + subreddit + "/" + filename)
-        database.addPodcastToDB(subreddit, filename, cloudStorage.getFileURL("listen-to-reddit-test", "subreddits/" + subreddit, filename), duration)
+        var today = new Date();
+        database.addPodcastToDB(subreddit,
+            filename,
+            cloudStorage.getFileURL("listen-to-reddit-test", "subreddits/" + subreddit, filename),
+            duration,
+            today)
     }
 
     console.log("\nAuto-upload complete!")
