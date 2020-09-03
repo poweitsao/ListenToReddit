@@ -1,6 +1,8 @@
 const fs = require('fs')
 const r = require("./snoowrapSetup.js")
 const { writeFile } = require("./../writeFile")
+const getUrls = require('get-urls');
+
 
 
 
@@ -20,54 +22,10 @@ const extractPostContent = (input) => {
     for (i = 0; i < clonedInput.length; i++) {
 
         var post = JSON.parse(JSON.stringify(clonedInput[i]))
-        post["selftext"] = post["selftext"].replace(/[^\x00-\x7F]/g, "").replace(/&#8203;|&#8203|&#x200B/gi,
-            () => { return "" })
-        post["title"] = post["title"].replace(/[^\x00-\x7F]/g, "").replace(/&#8203;|&#8203|&#x200B/gi,
-            () => { return "" })
-        var body = post["selftext"]
-        var title = post["title"]
-        // console.log(title)
-        // console.log(title)
-        // console.log(body)
-        var newline = "\n\n"
-        body = title.concat(newline, body)
-        // console.log("title: ", title)
-        // console.log("body: ", body)
-        var postSegments = []
-        key = title
-
+        key = post["title"]
         keys.push(key)
-
-        if (body.length > 5000) {
-            var remainingLength = body.length
-            var currentStart = 0
-            var currentEnd = 4999
-
-            while (remainingLength > 5000) {
-                if (body[currentEnd - 1] != ".") {
-                    for (j = currentEnd - 1; j > currentStart; j--) {
-                        if (body[j] == ".") {
-                            currentEnd = j + 1
-                            break;
-                        }
-                    }
-                }
-
-                postSegments.push(body.substring(currentStart, currentEnd))
-                currentStart = currentEnd
-                currentEnd = currentStart + 4999
-                remainingLength = body.length - currentStart
-
-            }
-            if (remainingLength > 0) {
-                postSegments.push(body.substring(currentStart, body.length))
-            }
-
-        } else if (body.length < 5000) {
-
-            postSegments.push(body)
-        }
-
+        var postSegments = extractPostTitleAndText(post)
+        console.log("postsegments", postSegments)
         splitPosts[key] = postSegments
     }
 
@@ -76,14 +34,87 @@ const extractPostContent = (input) => {
 
 }
 
+const extractPostTitleAndText = (post) => {
+    post["selftext"] = post["selftext"].replace(/[^\x00-\x7F]/g, "").replace(/&#8203;|&#8203|&#x200B/gi,
+        () => { return "" })
+    post["title"] = post["title"].replace(/[^\x00-\x7F]/g, "").replace(/&#8203;|&#8203|&#x200B/gi,
+        () => { return "" })
+    // console.log("post0:", post["selftext"])
+    // console.log("urls:", urls)
+    // console.log("post1:", post["selftext"])
+    var body = post["selftext"]
+
+
+
+
+    // console.log("body:", body)
+
+    var title = post["title"]
+    // console.log(title)
+    // console.log(title)
+    // console.log(body)
+    var newline = "\n\n"
+    body = title.concat(newline, body)
+
+    var urls = [...getUrls(post["selftext"], { stripWWW: false })]
+    for (var k = 0; k < urls.length; k++) {
+        // console.log("post:", post["selftext"])
+        console.log("url:", urls[k])
+        body = body.replace((urls[k]).toString(), "")
+        console.log("body", body)
+
+        // console.log(post["selftext"])
+    }
+    // console.log("title: ", title)
+    // console.log("body: ", body)
+    var postSegments = []
+
+
+
+
+    if (body.length > 5000) {
+        var remainingLength = body.length
+        var currentStart = 0
+        var currentEnd = 4999
+
+        while (remainingLength > 5000) {
+            if (body[currentEnd - 1] != ".") {
+                for (j = currentEnd - 1; j > currentStart; j--) {
+                    if (body[j] == ".") {
+                        currentEnd = j + 1
+                        break;
+                    }
+                }
+            }
+
+            postSegments.push(body.substring(currentStart, currentEnd))
+            currentStart = currentEnd
+            currentEnd = currentStart + 4999
+            remainingLength = body.length - currentStart
+
+        }
+        if (remainingLength > 0) {
+            postSegments.push(body.substring(currentStart, body.length))
+        }
+
+    } else if (body.length < 5000) {
+
+        postSegments.push(body)
+    }
+    return postSegments
+}
+
+const extractPostContentAndComments = (posts) = {}
+
 async function getTopComments(subreddit, time) {
     const content = await r.getTop(subreddit, { time: time, limit: 1 })
-    var response = await content[0].comments.fetchMore({ sort: 'top', skipReplies: "true", amount: 20 })
+    var response = content[0].comments.fetchMore({ sort: 'top', skipReplies: "true", amount: 1 })
     // console.log(result)
     response = JSON.parse(JSON.stringify(response))
     // console.log(response[0])
     var extractedComments = extractComments(response)
-    writeFile(JSON.stringify(extractedComments), "./../../json/topCommentsExtracted.json")
+    // writeFile(JSON.stringify(extractedComments), "./../../json/topCommentsExtracted.json")
+    return JSON.stringify(extractedComments)
 
 }
 

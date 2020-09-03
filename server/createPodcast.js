@@ -24,7 +24,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subredd
             rl.question("\nWould you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
                 if (defaultConfig == "yes") {
-                    redditAPI.getTopPosts(subreddit, "weekly", 5).then((result) => {
+                    redditAPI.getTopPosts(subreddit, "daily", 3).then((result) => {
                         var processedResult = redditAPI.extractPostContent(result)
                         writeFile(processedResult, directory + "/posts.json").then(async () => {
 
@@ -89,13 +89,26 @@ const convertPostToCombinedPodcast = async (file) => {
         await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, "post-" + postNumber.toString() + ".mp3")
     }
 }
+
+function processFilename(filename) {
+
+    if (filename.length > 250) {
+        for (var i = 250; filename[i] !== " "; i--) {
+        }
+        return filename.substring(0, i) + "..."
+    } else {
+        return filename
+    }
+}
+
 const convertPostsToPodcasts = async (file) => {
     const posts = JSON.parse(file)
 
     key = posts["keys"][0]
     for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
         key = posts["keys"][postNumber]
-        await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, key + ".mp3")
+        var filename = processFilename(key)
+        await textToSpeech.JSONToMP3(posts[key], "en-US", "MALE", "en-US-Wavenet-B", audioLocation, filename + ".mp3")
     }
 }
 

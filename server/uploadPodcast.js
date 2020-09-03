@@ -66,7 +66,7 @@ const autoUploadIndividualPodcasts = async (files, subreddit, audioLocation) => 
             today)
     }
 
-    console.log("\nAuto-upload complete!")
+    console.log('\x1b[36m%s\x1b[0m', "\nAuto-upload complete!")
 }
 
 
