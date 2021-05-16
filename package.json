@@ -14,6 +14,8 @@
     "@google-cloud/text-to-speech": "^2.3.0",
     "crunker": "^0.2.0",
     "dotenv": "^8.2.0",
+    "get-mp3-duration": "^1.0.0",
+    "get-urls": "^10.0.0",
     "snoowrap": "^1.21.0",
     "unirest": "^0.6.0"
   }

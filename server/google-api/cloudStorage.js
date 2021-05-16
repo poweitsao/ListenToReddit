@@ -13,7 +13,7 @@ var file = require("../../credentials/eternal-arcana-275612-78d4d7540a6a.json")
 
 const storage = new Storage({
     projectId: 'eternal-arcana-275612',
-    keyFilename: '/Users/poweitsao/Desktop/ListenReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
+    keyFilename: 'C:/Users/Powei/Documents/Projects/ListenToReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
 });
 
 async function uploadFile(bucketName, filename) {
@@ -32,7 +32,6 @@ async function uploadFile(bucketName, filename) {
     });
 
     console.log(`${filename} uploaded to ${bucketName}.`);
-
 }
 
 async function moveFile(bucketName, source, destination) {
@@ -43,7 +42,7 @@ async function moveFile(bucketName, source, destination) {
 }
 const getFileURL = (bucketName, folder, filename) => {
     // https://storage.cloud.google.com/listen-to-reddit-test/subreddits/tifu/tifu-2020-06-02.mp3
-    return "https://storage.cloud.google.com/" + bucketName + "/" + folder + "/" + filename;
+    return "https://storage.cloud.google.com/" + bucketName + "/" + folder + "/" + encodeURIComponent(filename);
 }
 
 async function getMetadata(bucketName, folder, filename) {

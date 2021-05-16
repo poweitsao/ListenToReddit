@@ -8,14 +8,16 @@ const getUrls = require('get-urls');
 
 async function getTopPosts(subreddit, time, limit) {
     const content = await r.getTop(subreddit, { time: time, limit: limit })
+    // console.log(content)
     return content
 
     // const filteredContent = await extractPostContent(content)
     // return filteredContent
 }
 
-const extractPostContent = (input) => {
+const extractPostContent = async (input, options = { includeComments: false, numberOfComments: 0 }) => {
     var clonedInput = JSON.parse(JSON.stringify(input))
+    var { includeComments, numberOfComments } = options
     var keys = []
     var key = ""
     var splitPosts = {}
@@ -24,8 +26,12 @@ const extractPostContent = (input) => {
         var post = JSON.parse(JSON.stringify(clonedInput[i]))
         key = post["title"]
         keys.push(key)
-        var postSegments = extractPostTitleAndText(post)
-        console.log("postsegments", postSegments)
+        var postContent = extractPostTitleAndText(post)
+        var comments = []
+        if (includeComments) {
+            comments = await extractPostComments(input[i], numberOfComments)
+        }
+        var postSegments = { "content": postContent, "comments": comments }
         splitPosts[key] = postSegments
     }
 
@@ -39,38 +45,17 @@ const extractPostTitleAndText = (post) => {
         () => { return "" })
     post["title"] = post["title"].replace(/[^\x00-\x7F]/g, "").replace(/&#8203;|&#8203|&#x200B/gi,
         () => { return "" })
-    // console.log("post0:", post["selftext"])
-    // console.log("urls:", urls)
-    // console.log("post1:", post["selftext"])
+
     var body = post["selftext"]
-
-
-
-
-    // console.log("body:", body)
-
-    var title = post["title"]
-    // console.log(title)
-    // console.log(title)
-    // console.log(body)
+    var title = post["title"] + ","
     var newline = "\n\n"
     body = title.concat(newline, body)
 
-    var urls = [...getUrls(post["selftext"], { stripWWW: false })]
-    for (var k = 0; k < urls.length; k++) {
-        // console.log("post:", post["selftext"])
-        console.log("url:", urls[k])
-        body = body.replace((urls[k]).toString(), "")
-        console.log("body", body)
+    body = body.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+    body = body.replace(/\*/g, '');
 
-        // console.log(post["selftext"])
-    }
-    // console.log("title: ", title)
-    // console.log("body: ", body)
+    // console.log(body)
     var postSegments = []
-
-
-
 
     if (body.length > 5000) {
         var remainingLength = body.length
@@ -104,7 +89,24 @@ const extractPostTitleAndText = (post) => {
     return postSegments
 }
 
-const extractPostContentAndComments = (posts) = {}
+const extractPostComments = async (post, numberOfComments) => {
+    var response = await post.comments.fetchMore({ sort: 'top', skipReplies: "true", amount: numberOfComments })
+    var comments = []
+    for (var i = 0; i < response.length; i++) {
+        // console.log(response[i])
+        if ((await response[i]).distinguished !== "moderator") {
+            var body = (await response[i]["body"])
+            // console.log("body:", body)
+            var urls = [...getUrls(post["selftext"], { stripWWW: false })]
+            for (var k = 0; k < urls.length; k++) {
+                body = body.replace((urls[k]).toString(), "")
+            }
+            comments.push(body)
+        }
+    }
+    return comments
+
+}
 
 async function getTopComments(subreddit, time) {
     const content = await r.getTop(subreddit, { time: time, limit: 1 })
@@ -143,6 +145,7 @@ const cleanseString = (string) => {
 
 module.exports = {
     extractPostContent,
+    extractPostComments,
     getTopComments,
     getTopPosts,
     cleanseString

@@ -6,13 +6,14 @@ const fs = require('fs');
 const util = require('util');
 // Creates a client
 async function JSONToMP3(text, languageCode, ssmlGender, voiceName, directory, filename) {
+    // console.log("text", text)
     // The text to synthesize
     // var response1 = require("./response1.json")
     const client = new textToSpeech.TextToSpeechClient();
-
+    // console.log(filename)
     // Construct the request
     const request = {
-        input: { text: text },
+        input: { text: text["content"][0] },
         // Select the language and SSML voice gender (optional)
         voice: { languageCode: languageCode, ssmlGender: ssmlGender, name: voiceName },
         // select the type of audio encoding
