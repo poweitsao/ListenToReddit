@@ -9,11 +9,11 @@ const { Storage } = require('@google-cloud/storage');
 
 // Creates a client
 
-var file = require("../../credentials/eternal-arcana-275612-78d4d7540a6a.json")
+var file = require("../../credentials/snoopods-us-fada7c2c7858.json")
 
 const storage = new Storage({
     projectId: 'eternal-arcana-275612',
-    keyFilename: 'C:/Users/Powei/Documents/Projects/ListenToReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
+    keyFilename: 'C:/Users/Powei/Documents/Projects/ListenToReddit/credentials/snoopods-us-fada7c2c7858.json',
 });
 
 async function uploadFile(bucketName, filename) {

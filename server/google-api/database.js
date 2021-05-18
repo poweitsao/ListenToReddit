@@ -1,6 +1,6 @@
 const Firestore = require('@google-cloud/firestore');
 
-var file = require("../../credentials/eternal-arcana-275612-78d4d7540a6a.json")
+var file = require("../../credentials/snoopods-us-fada7c2c7858.json")
 
 
 const db = new Firestore({
@@ -10,7 +10,7 @@ const db = new Firestore({
 
 // const db = new Firestore({
 //     projectId: 'eternal-arcana-275612',
-//     keyFilename: '/Users/poweitsao/Desktop/ListenReddit/credentials/eternal-arcana-275612-78d4d7540a6a.json',
+//     keyFilename: '/Users/poweitsao/Desktop/ListenReddit/credentials/snoopods-us-fada7c2c7858.json',
 // });
 
 const addPodcastToDB = async (subreddit, filename, storage_url, audio_length, date_posted) => {
