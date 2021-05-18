@@ -48,13 +48,19 @@ const extractPostTitleAndText = (post) => {
 
     var body = post["selftext"]
     var title = post["title"] + ","
-    var newline = "\n\n"
+    var newline = ".\n"
     body = title.concat(newline, body)
 
     body = body.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
     body = body.replace(/\*/g, '');
+    body = body.replace(/\"/g, "'");
 
     // console.log(body)
+    // var postSegments = breakUpBody(body)
+    return body
+}
+
+const breakUpBody = (body) => {
     var postSegments = []
 
     if (body.length > 5000) {
@@ -97,10 +103,12 @@ const extractPostComments = async (post, numberOfComments) => {
         if ((await response[i]).distinguished !== "moderator") {
             var body = (await response[i]["body"])
             // console.log("body:", body)
-            var urls = [...getUrls(post["selftext"], { stripWWW: false })]
-            for (var k = 0; k < urls.length; k++) {
-                body = body.replace((urls[k]).toString(), "")
-            }
+            // var urls = [...getUrls(post["selftext"], { stripWWW: false })]
+            // for (var k = 0; k < urls.length; k++) {
+            //     body = body.replace((urls[k]).toString(), "")
+            // }
+            body = body.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+            body = body.replace(/\*/g, '');
             comments.push(body)
         }
     }

@@ -17,6 +17,7 @@ const { getIndividualPodcasts } = require("./getIndividualPodcasts");
 
 
 rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subreddit) => {
+    // console.log(subreddit)
     rl.question("\nHow many posts do you want to get? ", (numOfPosts) => {
         numOfPosts = parseInt(numOfPosts)
         rl.question("\nDo you want the default option podcast configuration? (yes/no) ", (defaultConfig) => {
@@ -126,7 +127,7 @@ function processFilename(filename) {
 
 const convertPostsToPodcasts = async (file) => {
     const posts = JSON.parse(file)
-
+    // console.log(posts)
     key = posts["keys"][0]
     for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
         // console.log(key)
@@ -134,10 +135,19 @@ const convertPostsToPodcasts = async (file) => {
         var filename = processFilename(key)
         // console.log(filename)
         var comments = posts[key]["comments"]
+        // console.log("comments", comments)
         var text = JSON.parse(JSON.stringify(posts[key]))
-        for (var i = 0; i < comments.length; i++) {
-            text = text + "\n\n" + comments[i]
+        // console.log(comments)
+        if (comments.length > 0){
+            text["content"] = text["content"] + ". These are the top comments of this post."
+            
+            for (var i = 0; i < comments.length; i++) {
+                text["content"] = "\n" + text["content"] + "." + "Comment number " + (i + 1).toString() + ".";
+                text["content"] = text["content"] + "\n" + comments[i];
+            }
         }
+        
+        // console.log(text)
         await textToSpeech.JSONToMP3(text, "en-US", "MALE", "en-US-Wavenet-B", audioLocation, filename + ".mp3")
     }
 }
