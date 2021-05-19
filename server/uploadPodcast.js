@@ -42,26 +42,39 @@ const autoUploadCombinedPodcast = async (filename, subreddit) => {
 }
 
 const getPodcastDuration = (audioLocation, file) => {
+    // console.log("getPodcastDuration", audioLocation + "/" + file, 1)
     var buffer = fs.readFileSync(audioLocation + "/" + file)
     var duration = getMP3Duration(buffer) / 1000
     duration = Math.round(duration)
     return duration
 }
 
-const autoUploadIndividualPodcasts = async (files, subreddit, audioLocation) => {
+const autoUploadIndividualPodcasts = async (files, subreddit, audioLocation, filenameToPostTitle) => {
+    // console.log("autoUploading", 1)
     var duration = 0
     for (fileItr = 0; fileItr < files.length; fileItr++) {
         var filename = files[fileItr]
+        // console.log(audioLocation +"/" +  filename)
         duration = getPodcastDuration(audioLocation, filename)
-
+        // console.log("getPodcastDuration done")
         //console.log("duration", duration)
-
-        await cloudStorage.uploadFile("listen-to-reddit-test", audioLocation + "/" + filename)
-        await cloudStorage.moveFile("listen-to-reddit-test", "" + filename, "subreddits/" + subreddit + "/" + filename)
+        try{
+            await cloudStorage.uploadTrack("snoopods-us", audioLocation + "/" + filename)
+        } catch (e){
+            console.error("error in uploadTrack() call", e)
+        }
+        try{
+            await cloudStorage.moveFile("snoopods-us", filename, "tracks/" + filename)
+        } catch(e){
+            console.error("error in moveFile() call", e)
+        }
+        var postTitle = filenameToPostTitle[filename]
+        var trackID = filename.replace(".mp3", "")
         var today = new Date();
         database.addPodcastToDB(subreddit,
-            filename,
-            cloudStorage.getFileURL("listen-to-reddit-test", "subreddits/" + subreddit, filename),
+            trackID,
+            postTitle,
+            cloudStorage.getFileURL("snoopods-us/tracks", filename),
             duration,
             today)
     }

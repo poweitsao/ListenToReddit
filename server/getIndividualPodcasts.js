@@ -1,7 +1,10 @@
 var fs = require('fs');
 
 const getIndividualPodcasts = (directory) => {
+    console.log("reading podcasts", directory)
     var files = fs.readdirSync(directory);
+    files = files.filter(item => item != "tempCombine")
+    console.log(files)
     // files = files.join(' ')
 
     // console.log(files)

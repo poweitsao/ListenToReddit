@@ -1,5 +1,7 @@
 // Imports the Google Cloud client library
 const textToSpeech = require('@google-cloud/text-to-speech');
+var file = require("../../credentials/snoopods-us-fada7c2c7858.json")
+
 
 // Import other required libraries
 const fs = require('fs');
@@ -9,7 +11,10 @@ async function JSONToMP3(text, languageCode, ssmlGender, voiceName, directory, f
     // console.log("text", text)
     // The text to synthesize
     // var response1 = require("./response1.json")
-    var client = new textToSpeech.TextToSpeechClient();
+    var client = new textToSpeech.TextToSpeechClient({
+        projectId: 'snoopods-us',
+        credentials: { client_email: file.client_email, private_key: file.private_key }
+    });
     // console.log(filename)
     // Construct the request
     var postSegments = breakUpBody(text["content"])
@@ -46,7 +51,10 @@ async function JSONToMP3(text, languageCode, ssmlGender, voiceName, directory, f
         filename = filename.replace("/", " or ")
         const writeFile = util.promisify(fs.writeFile);
         for (var i = 0; i < postSegments.length; i++){
-            var client = new textToSpeech.TextToSpeechClient();
+            var client = new textToSpeech.TextToSpeechClient({
+                projectId: 'snoopods-us',
+                credentials: { client_email: file.client_email, private_key: file.private_key }
+            });
             
             var request = {
                 input: { text: postSegments[i] },

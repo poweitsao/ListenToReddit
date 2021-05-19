@@ -53,11 +53,12 @@ rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subredd
                                                     }
                                                 })
                                             } else {
-                                                await convertPostsToPodcasts(processedResult)
+                                                var filenameToPostTitle = await convertPostsToPodcasts(processedResult)
+                                                console.log(JSON.stringify(filenameToPostTitle))
                                                 if (upload == "yes") {
                                                     var files = getIndividualPodcasts(audioLocation)
 
-                                                    await uploadPodcast.autoUploadIndividualPodcasts(files, subreddit, audioLocation)
+                                                    await uploadPodcast.autoUploadIndividualPodcasts(files, subreddit, audioLocation, filenameToPostTitle)
                                                     archiveAudioFiles(audioLocation)
                                                     rl.close()
 
@@ -104,15 +105,15 @@ const convertPostToCombinedPodcast = async (file) => {
 
 function processFilename(filename) {
     // <>*?":/\| and blank space at the end
-    filename = filename.replace(/\//g, " or ")
-    filename = filename.replace(/</g, "")
-    filename = filename.replace(/>/g, "")
-    filename = filename.replace(/\*/g, "")
-    filename = filename.replace(/\?/g, "")
-    filename = filename.replace(/\"/g, "'")
-    filename = filename.replace(/\:/g, ",")
-    filename = filename.replace(/\|/g, "")
-    filename = filename.replace("\\", "");
+    // filename = filename.replace(/\//g, " or ")
+    // filename = filename.replace(/</g, "")
+    // filename = filename.replace(/>/g, "")
+    // filename = filename.replace(/\*/g, "")
+    // filename = filename.replace(/\?/g, "")
+    // filename = filename.replace(/\"/g, "'")
+    // filename = filename.replace(/\:/g, ",")
+    // filename = filename.replace(/\|/g, "")
+    // filename = filename.replace("\\", "");
 
 
 
@@ -128,11 +129,13 @@ function processFilename(filename) {
 const convertPostsToPodcasts = async (file) => {
     const posts = JSON.parse(file)
     // console.log(posts)
+    var filenameToPostTitle = {}
     key = posts["keys"][0]
     for (postNumber = 0; postNumber < posts["keys"].length; postNumber++) {
         // console.log(key)
         key = posts["keys"][postNumber]
         var filename = processFilename(key)
+        var filename = generateID(20)+".mp3"
         // console.log(filename)
         var comments = posts[key]["comments"]
         // console.log("comments", comments)
@@ -148,8 +151,25 @@ const convertPostsToPodcasts = async (file) => {
         }
         
         // console.log(text)
-        await textToSpeech.JSONToMP3(text, "en-US", "MALE", "en-US-Wavenet-B", audioLocation, filename + ".mp3")
+        try{
+            await textToSpeech.JSONToMP3(text, "en-US", "MALE", "en-US-Wavenet-B", audioLocation, filename)
+            filenameToPostTitle[filename] = processFilename(key)
+        } catch (e){
+            console.error(e)
+        }
     }
+    return filenameToPostTitle
+}
+
+function generateID(length) {
+    var result           = [];
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result.push(characters.charAt(Math.floor(Math.random() * 
+ charactersLength)));
+   }
+   return result.join('');
 }
 
 const createPodcastFilename = (subreddit) => {
@@ -174,7 +194,7 @@ const customPodcast = (subreddit) => {
 
 function archiveAudioFiles(directory) {
     var exec = require('child_process').exec;
-    exec(`cd ${directory}; mv *.mp3 ../archive`,
+    exec(`mv *.mp3 ../archive`,{cwd: directory},
         function (error, stdout, stderr) {
 
             console.log(stdout);
@@ -183,7 +203,7 @@ function archiveAudioFiles(directory) {
                 console.error('exec error: ' + error);
             }
 
-            if (fs.readdirSync(directory).length === 0) {
+            if (fs.readdirSync(directory) == ["tempCombine"]) {
                 console.info('\x1b[36m%s\x1b[0m', "Successfully archived files.")
 
             } else {

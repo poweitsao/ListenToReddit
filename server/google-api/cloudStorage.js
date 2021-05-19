@@ -12,11 +12,29 @@ const { Storage } = require('@google-cloud/storage');
 var file = require("../../credentials/snoopods-us-fada7c2c7858.json")
 
 const storage = new Storage({
-    projectId: 'eternal-arcana-275612',
+    projectId: 'snoopods-us',
     keyFilename: 'C:/Users/Powei/Documents/Projects/ListenToReddit/credentials/snoopods-us-fada7c2c7858.json',
 });
 
 async function uploadFile(bucketName, filename) {
+    // Uploads a local file to the bucket
+    await storage.bucket(bucketName).upload(filename, {
+        // Support for HTTP requests made with `Accept-Encoding: gzip`
+        // gzip: false,
+        // By setting the option `destination`, you can change the name of the
+        // object you are uploading to a bucket.
+        metadata: {
+            // Enable long-lived HTTP caching headers
+            // Use only if the contents of the file will never change
+            // (If the contents will change, use cacheControl: 'no-cache')
+            cacheControl: 'public, max-age=31536000',
+        },
+    });
+
+    console.log(`${filename} uploaded to ${bucketName}.`);
+}
+
+async function uploadTrack(bucketName, filename) {
     // Uploads a local file to the bucket
     await storage.bucket(bucketName).upload(filename, {
         // Support for HTTP requests made with `Accept-Encoding: gzip`
@@ -40,9 +58,8 @@ async function moveFile(bucketName, source, destination) {
     console.log(`${source} moved to ${destination}.`);
 
 }
-const getFileURL = (bucketName, folder, filename) => {
-    // https://storage.cloud.google.com/listen-to-reddit-test/subreddits/tifu/tifu-2020-06-02.mp3
-    return "https://storage.cloud.google.com/" + bucketName + "/" + folder + "/" + encodeURIComponent(filename);
+const getFileURL = (objectLocation, filename) => {
+    return "https://storage.cloud.google.com/"+ objectLocation + "/" + encodeURIComponent(filename);
 }
 
 async function getMetadata(bucketName, folder, filename) {
@@ -99,5 +116,6 @@ module.exports = {
     moveFile,
     getFileURL,
     getMetadata,
-    setEncoding
+    setEncoding,
+    uploadTrack
 }
