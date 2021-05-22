@@ -37,7 +37,7 @@ const addPodcastToDB = async (subreddit, track_id, post_title, storage_url, audi
         await newSubredditRef.set({
             mainCollectionID: collectionID,
             newestUpdatesCollectionID: newestUpdatesCollectionID,
-            pictureURL: "https://img.icons8.com/fluent/48/000000/image.png",
+            pictureURL: "https://img.icons8.com/fluent/800/000000/image.png",
             subredditName: subreddit,
         })
 

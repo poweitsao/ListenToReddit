@@ -27,7 +27,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subredd
                     rl.question("\nWould you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
                         if (defaultConfig == "yes") {
-                            redditAPI.getTopPosts(subreddit, "week", numOfPosts).then((result) => {
+                            redditAPI.getTopPosts(subreddit, "day", numOfPosts).then((result) => {
                                 // console.log(result)
                                 redditAPI.extractPostContent(result,
                                     {
