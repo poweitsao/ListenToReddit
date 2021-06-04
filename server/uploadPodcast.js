@@ -58,14 +58,14 @@ const autoUploadIndividualPodcasts = async (files, subreddit, audioLocation, fil
         duration = getPodcastDuration(audioLocation, filename)
         // console.log("getPodcastDuration done")
         //console.log("duration", duration)
-        try{
+        try {
             await cloudStorage.uploadTrack("snoopods-us", audioLocation + "/" + filename)
-        } catch (e){
+        } catch (e) {
             console.error("error in uploadTrack() call", e)
         }
-        try{
+        try {
             await cloudStorage.moveFile("snoopods-us", filename, "tracks/" + filename)
-        } catch(e){
+        } catch (e) {
             console.error("error in moveFile() call", e)
         }
         var postTitle = filenameToPostTitle[filename]

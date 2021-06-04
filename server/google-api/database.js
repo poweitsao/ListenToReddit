@@ -6,7 +6,7 @@ const admin = require('firebase-admin');
 const serviceAccount = require('../../credentials/snoopods-us-fada7c2c7858.json');
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount)
 });
 
 const db = admin.firestore();
@@ -27,10 +27,10 @@ const addPodcastToDB = async (subreddit, track_id, post_title, storage_url, audi
 
     var subredditSnapshot = await checkSubredditRef.get()
     // console.log(subredditSnapshot)
-    if(subredditSnapshot.empty){
+    if (subredditSnapshot.empty) {
 
-        var collectionID = await createCollection(subreddit+"'s Collection", "admin", [])
-        const newestUpdatesCollectionID = await createCollection(subreddit+"'s Latest Updates", "admin", [])
+        var collectionID = await createCollection(subreddit + "'s Collection", "admin", [])
+        const newestUpdatesCollectionID = await createCollection(subreddit + "'s Latest Updates", "admin", [])
         const newSubredditRef = db.collection("subreddits").doc(subreddit)
         // console.log(typeof(collectionID), collectionID)
 
@@ -41,51 +41,53 @@ const addPodcastToDB = async (subreddit, track_id, post_title, storage_url, audi
             subredditName: subreddit,
         })
 
-    } 
+    }
 
 
     let trackRef = db.collection('tracks').doc(track_id)
-    
-    try{
+
+    try {
         await trackRef.set({
             trackID: track_id,
             trackName: post_title,
             filename: track_id + ".mp3",
             cloudStorageURL: storage_url,
             audioLength: audio_length,
-            datePosted: date_posted
+            datePosted: date_posted,
+            subreddit: subreddit,
+            pictureURL: "https://img.icons8.com/fluent/800/000000/image.png"
         })
         console.log(track_id + ".mp3 added to subreddits" + "/" + subreddit + "/podcasts in Cloud Datastore")
         const subredditDoc = await db.collection('subreddits').doc(subreddit).get()
         const collectionID = subredditDoc.data()["mainCollectionID"]
 
         const subredditCollectionRef = db.collection("collections").doc(collectionID)
-        
+
         await subredditCollectionRef.update({
             tracks: admin.firestore.FieldValue.arrayUnion(track_id)
         })
 
 
-    } catch(e){
+    } catch (e) {
         console.error("error in uploading track", e)
     }
-    
+
 
 }
 
 const createCollection = async (collectionName, ownerID, tracks) => {
     // console.log("creating collection", collectionName)
-    try{
+    try {
         const res = await db.collection("collections").add({
             collectionID: "",
             collectionName: collectionName,
-            ownerID: ownerID, 
+            ownerID: ownerID,
             tracks: tracks
         })
-        var key = res.id 
-        await db.collection("collections").doc(res.id).update({collectionID: key})
+        var key = res.id
+        await db.collection("collections").doc(res.id).update({ collectionID: key })
         return key
-    } catch(e){
+    } catch (e) {
         console.error("error in createCollection", e)
     }
 }

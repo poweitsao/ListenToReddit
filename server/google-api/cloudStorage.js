@@ -13,7 +13,7 @@ var file = require("../../credentials/snoopods-us-fada7c2c7858.json")
 
 const storage = new Storage({
     projectId: 'snoopods-us',
-    keyFilename: 'C:/Users/Powei/Documents/Projects/ListenToReddit/credentials/snoopods-us-fada7c2c7858.json',
+    keyFilename: '/Users/poweitsao/Documents/coding/snoopods project/ListenToReddit/credentials/snoopods-us-fada7c2c7858.json',
 });
 
 async function uploadFile(bucketName, filename) {
@@ -59,7 +59,7 @@ async function moveFile(bucketName, source, destination) {
 
 }
 const getFileURL = (objectLocation, filename) => {
-    return "https://storage.cloud.google.com/"+ objectLocation + "/" + encodeURIComponent(filename);
+    return "https://storage.cloud.google.com/" + objectLocation + "/" + encodeURIComponent(filename);
 }
 
 async function getMetadata(bucketName, folder, filename) {

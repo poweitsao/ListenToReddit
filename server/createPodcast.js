@@ -27,7 +27,7 @@ rl.question("\nWhat subreddit do you want to create a podcast for? \n", (subredd
                     rl.question("\nWould you like to automatically upload the new podcast to Cloud DataStore? (yes/no)", (upload) => {
 
                         if (defaultConfig == "yes") {
-                            redditAPI.getTopPosts(subreddit, "day", numOfPosts).then((result) => {
+                            redditAPI.getTopPosts(subreddit, "all", numOfPosts).then((result) => {
                                 // console.log(result)
                                 redditAPI.extractPostContent(result,
                                     {
@@ -135,26 +135,26 @@ const convertPostsToPodcasts = async (file) => {
         // console.log(key)
         key = posts["keys"][postNumber]
         var filename = processFilename(key)
-        var filename = generateID(20)+".mp3"
+        var filename = generateID(20) + ".mp3"
         // console.log(filename)
         var comments = posts[key]["comments"]
         // console.log("comments", comments)
         var text = JSON.parse(JSON.stringify(posts[key]))
         // console.log(comments)
-        if (comments.length > 0){
+        if (comments.length > 0) {
             text["content"] = text["content"] + ". These are the top comments of this post."
-            
+
             for (var i = 0; i < comments.length; i++) {
                 text["content"] = "\n" + text["content"] + "." + "Comment number " + (i + 1).toString() + ".";
                 text["content"] = text["content"] + "\n" + comments[i];
             }
         }
-        
+
         // console.log(text)
-        try{
+        try {
             await textToSpeech.JSONToMP3(text, "en-US", "MALE", "en-US-Wavenet-B", audioLocation, filename)
             filenameToPostTitle[filename] = processFilename(key)
-        } catch (e){
+        } catch (e) {
             console.error(e)
         }
     }
@@ -162,14 +162,14 @@ const convertPostsToPodcasts = async (file) => {
 }
 
 function generateID(length) {
-    var result           = [];
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-      result.push(characters.charAt(Math.floor(Math.random() * 
- charactersLength)));
-   }
-   return result.join('');
+    for (var i = 0; i < length; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() *
+            charactersLength)));
+    }
+    return result.join('');
 }
 
 const createPodcastFilename = (subreddit) => {
@@ -194,7 +194,7 @@ const customPodcast = (subreddit) => {
 
 function archiveAudioFiles(directory) {
     var exec = require('child_process').exec;
-    exec(`mv *.mp3 ../archive`,{cwd: directory},
+    exec(`mv *.mp3 ../archive`, { cwd: directory },
         function (error, stdout, stderr) {
 
             console.log(stdout);
@@ -203,11 +203,12 @@ function archiveAudioFiles(directory) {
                 console.error('exec error: ' + error);
             }
 
-            if (fs.readdirSync(directory) == ["tempCombine"]) {
+            if (fs.readdirSync(directory).length == 1) {
                 console.info('\x1b[36m%s\x1b[0m', "Successfully archived files.")
 
             } else {
                 console.error("%c Something went wrong. Files still found in directory")
+                console.log(fs.readdirSync(directory))
             }
 
         })
